@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | Flatmate Finder</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="index.html" class="logo">
+                <span class="home-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                        class="bi bi-house-door-fill" viewBox="0 0 16 16">
+                        <path
+                            d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5" />
+                    </svg>
+                </span>
+                <span class="logo-text">Flatmate <span class="logo-bold">Finder</span></span>
+            </a>
+        </div>
+        <ul id="navbar-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="signup.html">Sign Up</a></li>
+        </ul>
+    </nav>
+
+    <div class="login-container">
+        <form class="login-form" id="loginForm">
+            <h2 class="login-title">Welcome Back</h2>
+            <p class="login-subtitle">Login to your account</p>
+
+            <div id="message" style="display: none; padding: 10px; margin-bottom: 15px; border-radius: 5px; text-align: center;">
+            </div>
+
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+
+            <div class="remember-row">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Remember me</label>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">Login</button>
+
+            <p class="register-text">
+                Don't have an account?
+                <a href="signup.html" class="register-link">Register here</a>
+            </p>
+        </form>
+    </div>
+
+    <script>
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('/api/user', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+
+                if (data.success && data.loggedIn) {
+                    // User is already logged in, redirect to dashboard
+                    window.location.href = 'user-dashboard.html';
+                    return;
+                }
+            } catch (error) {
+                console.log('Not logged in, showing login form');
+            }
+        });
+
+        function showMessage(message, isError = false) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            messageDiv.style.backgroundColor = isError ? '#ffebee' : '#e8f5e8';
+            messageDiv.style.color = isError ? '#d32f2f' : '#2e7d32';
+            messageDiv.style.border = `1px solid ${isError ? '#ffcdd2' : '#c8e6c9'}`;
+        }
+
+        function hideMessage() {
+            document.getElementById('message').style.display = 'none';
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const loginBtn = document.getElementById('loginBtn');
+            const originalText = loginBtn.textContent;
+
+            // Disable button and show loading
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+            hideMessage();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                showMessage('Please enter your email and password.', true);
+                loginBtn.disabled = false;
+                loginBtn.textContent = originalText;
+                return;
+            }
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include', // Important: include credentials for session
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage(data.message);
+
+                    // Store user info in localStorage for quick access (optional)
+                    localStorage.setItem('loggedInUserEmail', data.user.email);
+                    localStorage.setItem('loggedInUserName', data.user.fullname);
+                    localStorage.setItem('loggedInUserId', data.user.id);
+
+                    // Redirect after a short delay
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 1000);
+                } else {
+                    showMessage('Login failed: ' + data.message, true);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('Error logging in. Please try again.', true);
+            } finally {
+                // Re-enable button
+                loginBtn.disabled = false;
+                loginBtn.textContent = originalText;
+            }
+        });
+
+        // Clear any error messages when user starts typing
+        document.getElementById('email').addEventListener('input', hideMessage);
+        document.getElementById('password').addEventListener('input', hideMessage);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flatmate Finder - Find Your Perfect Roommate</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="#" class="logo">
+                <span class="home-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                        class="bi bi-house-door-fill" viewBox="0 0 16 16">
+                        <path
+                            d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5" />
+                    </svg>
+                </span>
+                <span class="logo-text">Flatmate <span class="logo-bold">Finder</span></span>
+            </a>
+        </div>
+
+        <ul id="navbar-links">
+            <li><a href="login.html">Login</a></li>
+            <li><a href="signup.html">Sign Up</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="slider-container">
+        <div class="slide active" style="background-image: url('/pics/francesca-tosolini-qnSTxcs0EEs-unsplash.jpg');"></div>
+        <div class="slide" style="background-image: url('/pics/chastity-cortijo-R-w5Q-4Mqm0-unsplash.jpg');"></div>
+        <div class="slide" style="background-image: url('/pics/katja-rooke-77JACslA8G0-unsplash.jpg');"></div>
+
+        <button class="arrow arrow-left" onclick="changeSlide(-1)">‹</button>
+        <button class="arrow arrow-right" onclick="changeSlide(1)">›</button>
+
+        <div class="indicators">
+            <span class="dot active" onclick="currentSlide(1)"></span>
+            <span class="dot" onclick="currentSlide(2)"></span>
+            <span class="dot" onclick="currentSlide(3)"></span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <section class="main-bg">
+        <div class="header">
+            <h1>Find Your Perfect Flatmate</h1>
+            <p class="subtitle">Connect with like-minded people and find your ideal living situation</p>
+            <a href="signup.html" class="cta-button">Get Started Today</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <div class="features-outer">
+        <div class="features-row">
+            <div class="feature">
+                <div class="feature-icon">📝</div>
+                <h3>Share Requirements</h3>
+                <p>Need a flatmate? Share your requirements with others.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔍</div>
+                <h3>Advanced Filters</h3>
+                <p>Advanced filters to find exactly what you're looking for</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <h3>Verified Users</h3>
+                <p>All users are verified for your safety and security</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💬</div>
+                <h3>Direct Chat</h3>
+                <p>Connect and chat with potential flatmates directly</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Flatmate Finder. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+
+        function changeSlide(direction) {
+            currentSlideIndex += direction;
+            if (currentSlideIndex >= slides.length) currentSlideIndex = 0;
+            if (currentSlideIndex < 0) currentSlideIndex = slides.length - 1;
+            showSlide(currentSlideIndex);
+        }
+
+        function currentSlide(index) {
+            currentSlideIndex = index - 1;
+            showSlide(currentSlideIndex);
+        }
+
+        // Auto slide
+        setInterval(() => {
+            changeSlide(1);
+        }, 5000);
+    </script>
+</body>
+
+</html>

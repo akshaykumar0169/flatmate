@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Posts | Flatmate Finder</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #4CAF50;
+            margin-bottom: 0.5rem;
+            font-size: 2.2rem;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .posts-grid {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .post {
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .post h3 {
+            margin: 0;
+            color: #333;
+            font-size: 1.4rem;
+        }
+
+        .post-date {
+            color: #888;
+            font-size: 0.9rem;
+            background: #e8f5e8;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .post-images {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .post-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .post-image:hover {
+            transform: scale(1.05);
+        }
+
+        .post-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #4CAF50;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #333;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .detail-value {
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .post-preferences {
+            margin-top: 15px;
+        }
+
+        .preference-tag {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin: 2px;
+        }
+
+        .post-notes {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .notes-label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .notes-text {
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .no-posts {
+            text-align: center;
+            color: #888;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px dashed #ddd;
+        }
+
+        .no-posts h3 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .no-posts-icon {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .action-buttons {
+            text-align: center;
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            background: #ffebee;
+            border-radius: 8px;
+            color: #d32f2f;
+            margin: 20px 0;
+        }
+
+        .stats-summary {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+
+            .post-details {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="user-dashboard.html" class="logo">
+                <span class="home-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                        class="bi bi-house-door-fill" viewBox="0 0 16 16">
+                        <path
+                            d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5" />
+                    </svg>
+                </span>
+                <span class="logo-text">Flatmate <span class="logo-text">Finder</span></span>
+            </a>
+        </div>
+        <ul id="navbar-links">
+            <li id="profile-menu" class="profile-menu">
+                <a href="user-dashboard.html" id="profile-icon" class="profile-icon">👤</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h2>My Flatmate Posts</h2>
+            <p class="subtitle">Manage your flatmate requirements and listings</p>
+        </div>
+
+        <div id="loading" class="loading">
+            <div>Loading your posts...</div>
+        </div>
+
+        <div id="error" class="error" style="display: none;">
+            Error loading posts. Please try again.
+        </div>
+
+        <div id="stats-summary" class="stats-summary" style="display: none;">
+            <!-- Stats will be inserted here -->
+        </div>
+
+        <div id="myPostsContainer" class="posts-grid">
+            <!-- Posts will be inserted here -->
+        </div>
+
+        <div class="action-buttons">
+            <a href="post-requirement.html" class="btn">+ Create New Post</a>
+            <a href="user-dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        let userPosts = [];
+
+        async function checkAuthAndFetchPosts() {
+            try {
+                // Check if user is logged in
+                const authResponse = await fetch('/api/user', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const authData = await authResponse.json();
+
+                if (!authData.success || !authData.loggedIn) {
+                    alert('Please log in to view your posts');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Fetch user's posts
+                const postsResponse = await fetch('/api/my-posts', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!postsResponse.ok) {
+                    throw new Error('Failed to fetch posts');
+                }
+
+                userPosts = await postsResponse.json();
+                renderPosts();
+                renderStats();
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error loading posts. Please try again.');
+            }
+        }
+
+        function renderStats() {
+            if (userPosts.length === 0) return;
+
+            const totalPosts = userPosts.length;
+            const recentPosts = userPosts.filter(post => {
+                const postDate = new Date(post.createdAt);
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                return postDate > thirtyDaysAgo;
+            }).length;
+
+            const avgPrice = userPosts.reduce((sum, post) => sum + (post.price || 0), 0) / userPosts.length;
+
+            const statsHTML = `
+                <h3 style="margin: 0 0 15px 0; font-size: 1.4rem;">Your Posts Summary</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number">${totalPosts}</span>
+                        <div class="stat-label">Total Posts</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">${recentPosts}</span>
+                        <div class="stat-label">Recent Posts</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">₹${Math.round(avgPrice)}</span>
+                        <div class="stat-label">Avg. Budget</div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById("stats-summary").innerHTML = statsHTML;
+            document.getElementById("stats-summary").style.display = "block";
+        }
+
+        function renderPosts() {
+            document.getElementById("loading").style.display = "none";
+
+            const myPostsContainer = document.getElementById("myPostsContainer");
+
+            if (!Array.isArray(userPosts) || userPosts.length === 0) {
+                myPostsContainer.innerHTML = `
+                    <div class="no-posts">
+                        <div class="no-posts-icon">📝</div>
+                        <h3>No posts yet!</h3>
+                        <p>You haven't posted any flatmate requirements yet.<br>
+                        Create your first post to start finding flatmates!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            myPostsContainer.innerHTML = '';
+
+            userPosts.forEach((post, index) => {
+                const div = document.createElement("div");
+                div.className = "post";
+
+                let imagesHtml = "";
+                if (post.images && Array.isArray(post.images) && post.images.length > 0) {
+                    imagesHtml = `
+                        <div class="post-images">
+                            ${post.images.map(url =>
+                                `<img src="${url}" class="post-image" alt="Flatmate Post Image" onclick="openImageModal('${url}')">`
+                            ).join('')}
+                        </div>
+                    `;
+                }
+
+                const preferences = post.prefs && Array.isArray(post.prefs) && post.prefs.length > 0 
+                    ? post.prefs.map(pref => `<span class="preference-tag">${pref}</span>`).join('')
+                    : '<span class="preference-tag">No preferences specified</span>';
+
+                div.innerHTML = `
+                    <div class="post-header">
+                        <h3>Flatmate Requirement #${index + 1}</h3>
+                        <div class="post-date">${new Date(post.createdAt).toLocaleDateString()}</div>
+                    </div>
+
+                    ${imagesHtml}
+
+                    <div class="post-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Budget</div>
+                            <div class="detail-value">₹${post.price || 'Not specified'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Location</div>
+                            <div class="detail-value">${post.location || 'Not specified'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">City, State</div>
+                            <div class="detail-value">${post.city || 'N/A'}, ${post.state || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Furnishing</div>
+                            <div class="detail-value">${post.furnishing || 'Not specified'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Preferred Gender</div>
+                            <div class="detail-value">${post.gender || 'No preference'}</div>
+                        </div>
+                    </div>
+
+                    <div class="post-preferences">
+                        <strong>Preferences:</strong><br>
+                        ${preferences}
+                    </div>
+
+                    ${post.notes ? `
+                        <div class="post-notes">
+                            <div class="notes-label">Additional Notes:</div>
+                            <div class="notes-text">${post.notes}</div>
+                        </div>
+                    ` : ''}
+                `;
+
+                myPostsContainer.appendChild(div);
+            });
+        }
+
+        function showError(message) {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("error").style.display = "block";
+            document.getElementById("error").textContent = message;
+        }
+
+        function openImageModal(imageUrl) {
+            // Simple image modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+                cursor: pointer;
+            `;
+
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.style.cssText = 'max-width: 90%; max-height: 90%; border-radius: 8px;';
+
+            modal.appendChild(img);
+            modal.onclick = () => document.body.removeChild(modal);
+            document.body.appendChild(modal);
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Logged out successfully');
+                    window.location.href = 'index.html';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Error logging out');
+            }
+        }
+
+        // Load posts when page loads
+        document.addEventListener("DOMContentLoaded", checkAuthAndFetchPosts);
+    </script>
+</body>
+
+</html>

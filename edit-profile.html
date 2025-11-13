@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Flatmate Finder</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .home-icon {
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-text {
+            color: white;
+            font-weight: 700;
+        }
+
+        #navbar-links {
+            list-style: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-menu {
+            position: relative;
+        }
+
+        .profile-icon {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            min-width: 180px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .profile-menu:hover .profile-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile-dropdown a {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s ease;
+        }
+
+        .profile-dropdown a:hover {
+            background-color: #f8f9fa;
+        }
+
+        .profile-dropdown a:first-child {
+            border-radius: 10px 10px 0 0;
+        }
+
+        .profile-dropdown a:last-child {
+            border-bottom: none;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .email-verification-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 2px solid #e9ecef;
+        }
+
+        .email-field {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .email-input-container {
+            flex: 1;
+        }
+
+        .verification-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .verification-status.verified {
+            color: #28a745;
+        }
+
+        .verification-status.not-verified {
+            color: #dc3545;
+        }
+
+        .verified-tick {
+            color: #28a745;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .not-verified-cross {
+            color: #dc3545;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .verify-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .verify-btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .verify-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .otp-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+            display: none;
+        }
+
+        .otp-section.show {
+            display: block;
+        }
+
+        .otp-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .otp-input {
+            flex: 1;
+            max-width: 150px;
+        }
+
+        .verify-otp-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .verify-otp-btn:hover {
+            background: #1e7e34;
+        }
+
+        .verify-otp-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .help-text {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8d7da;
+            border-radius: 5px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success-message {
+            color: #155724;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            padding: 10px;
+            background: #d4edda;
+            border-radius: 5px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .readonly-field {
+            background: #f8f9fa !important;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-3px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 12px 20px;
+            }
+
+            .logo {
+                font-size: 20px;
+            }
+
+            .container {
+                margin: 20px 15px;
+                border-radius: 15px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .header h2 {
+                font-size: 2rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .email-field {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .otp-input-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .otp-input {
+                max-width: none;
+            }
+
+            .profile-dropdown {
+                right: -10px;
+                min-width: 160px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 10px 15px;
+            }
+
+            .container {
+                margin: 15px 10px;
+            }
+        }
+
+        /* Animation for container */
+        .container {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="user-dashboard.html" class="logo">
+                <span class="home-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                        class="bi bi-house-door-fill" viewBox="0 0 16 16">
+                        <path
+                            d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5" />
+                    </svg>
+                </span>
+                <span class="logo-text">Flatmate Finder</span>
+            </a>
+        </div>
+
+        <ul id="navbar-links">
+            <li id="profile-menu" class="profile-menu">
+                <div class="profile-icon" id="profile-icon">👤</div>
+                <div class="profile-dropdown">
+                    <a href="profile.html">My Profile</a>
+                    <a href="my-posts.html">My Posts</a>
+                    <a href="#" onclick="alert('Settings page coming soon!')">Settings</a>
+                    <a href="#" id="logout-btn" onclick="logout()">Logout</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h2>Edit Profile</h2>
+            <p style="font-size: 1rem; margin-top: 5px;">Update your account and contact information</p>
+        </div>
+
+        <div class="content">
+            <div class="loading" id="loading">
+                🔄 Loading your profile data...
+            </div>
+
+            <form id="profileForm" style="display: none;">
+                <div class="form-group">
+                    <label for="fullname">Full Name</label>
+                    <input type="text" id="fullname" name="fullname" required>
+                </div>
+
+                <div class="email-verification-section">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <div class="email-field">
+                            <div class="email-input-container">
+                                <input type="email" id="email" name="email" class="readonly-field" readonly>
+                                <div class="help-text">Email cannot be changed</div>
+                            </div>
+                            <div class="verification-status" id="verificationStatus">
+                                <span class="not-verified-cross">✗</span>
+                                <span>Not Verified</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="verification-actions" id="verificationActions">
+                        <button type="button" class="verify-btn" id="sendOtpBtn">
+                            Send OTP
+                        </button>
+                        <div class="help-text">Click to send a verification code to your email</div>
+                    </div>
+
+                    <div class="otp-section" id="otpSection">
+                        <label for="otpInput">Enter OTP Code</label>
+                        <div class="otp-input-group">
+                            <input type="text" id="otpInput" class="otp-input" placeholder="Enter 6-digit code" maxlength="6">
+                            <button type="button" class="verify-otp-btn" id="verifyOtpBtn">
+                                Verify OTP
+                            </button>
+                        </div>
+                        <div class="help-text">Check your email for the verification code (expires in 5 minutes)</div>
+                    </div>
+
+                    <div id="verificationMessage"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" name="age" min="18" max="100" required>
+                    <div class="help-text">Must be between 18 and 100</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="occupation">Occupation</label>
+                    <input type="text" id="occupation" name="occupation" required>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary" id="saveBtn">
+                        💾 Save Changes
+                    </button>
+                    <a href="profile.html" class="btn btn-secondary">
+                        ← Back to Profile
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Flatmate Finder. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loading = document.getElementById('loading');
+            const form = document.getElementById('profileForm');
+            const sendOtpBtn = document.getElementById('sendOtpBtn');
+            const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+            const otpSection = document.getElementById('otpSection');
+            const otpInput = document.getElementById('otpInput');
+            const verificationStatus = document.getElementById('verificationStatus');
+            const verificationActions = document.getElementById('verificationActions');
+            const verificationMessage = document.getElementById('verificationMessage');
+            let isEmailVerified = false;
+
+            // Load profile data
+            loadProfile();
+
+            async function loadProfile() {
+                try {
+                    const response = await fetch('/api/profile', {
+                        credentials: 'include'
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Populate form fields
+                        document.getElementById('fullname').value = data.fullname || '';
+                        document.getElementById('email').value = data.email || '';
+                        document.getElementById('phone').value = data.phone || '';
+                        document.getElementById('age').value = data.age || '';
+                        document.getElementById('gender').value = data.gender || '';
+                        document.getElementById('occupation').value = data.occupation || '';
+
+                        // Update email verification status
+                        isEmailVerified = data.emailVerified || false;
+                        updateVerificationStatus(isEmailVerified);
+
+                        // Show form and hide loading
+                        loading.style.display = 'none';
+                        form.style.display = 'block';
+                    } else {
+                        throw new Error(data.message || 'Failed to load profile');
+                    }
+                } catch (error) {
+                    console.error('Error loading profile:', error);
+                    showMessage('Error loading profile data. Please try again.', 'error');
+                    loading.style.display = 'none';
+                }
+            }
+
+            function updateVerificationStatus(verified) {
+                const statusElement = verificationStatus;
+                const actionsElement = verificationActions;
+
+                if (verified) {
+                    statusElement.innerHTML = `
+                        <span class="verified-tick">✓</span>
+                        <span>Verified</span>
+                    `;
+                    statusElement.className = 'verification-status verified';
+                    actionsElement.style.display = 'none';
+                } else {
+                    statusElement.innerHTML = `
+                        <span class="not-verified-cross">✗</span>
+                        <span>Not Verified</span>
+                    `;
+                    statusElement.className = 'verification-status not-verified';
+                    actionsElement.style.display = 'block';
+                }
+            }
+
+            // Send OTP functionality
+            sendOtpBtn.addEventListener('click', async function() {
+                if (isEmailVerified) {
+                    showMessage('Email is already verified!', 'success');
+                    return;
+                }
+
+                sendOtpBtn.disabled = true;
+                sendOtpBtn.textContent = 'Sending...';
+
+                try {
+                    const response = await fetch('/api/send-otp', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showMessage('OTP sent successfully! Check your email.', 'success');
+                        otpSection.classList.add('show');
+                        otpInput.focus();
+                    } else {
+                        showMessage(data.message || 'Failed to send OTP', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error sending OTP:', error);
+                    showMessage('Error sending OTP. Please try again.', 'error');
+                } finally {
+                    sendOtpBtn.disabled = false;
+                    sendOtpBtn.textContent = 'Send OTP';
+                }
+            });
+
+            // Verify OTP functionality
+            verifyOtpBtn.addEventListener('click', async function() {
+                const otp = otpInput.value.trim();
+
+                if (!otp) {
+                    showMessage('Please enter the OTP code', 'error');
+                    otpInput.focus();
+                    return;
+                }
+
+                if (otp.length !== 6) {
+                    showMessage('OTP must be 6 digits', 'error');
+                    otpInput.focus();
+                    return;
+                }
+
+                verifyOtpBtn.disabled = true;
+                verifyOtpBtn.textContent = 'Verifying...';
+
+                try {
+                    const response = await fetch('/api/verify-otp', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ otp: otp })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showMessage('Email verified successfully! ✓', 'success');
+                        isEmailVerified = true;
+                        updateVerificationStatus(true);
+                        otpSection.classList.remove('show');
+                        otpInput.value = '';
+                    } else {
+                        showMessage(data.message || 'Invalid OTP code', 'error');
+                        otpInput.focus();
+                    }
+                } catch (error) {
+                    console.error('Error verifying OTP:', error);
+                    showMessage('Error verifying OTP. Please try again.', 'error');
+                } finally {
+                    verifyOtpBtn.disabled = false;
+                    verifyOtpBtn.textContent = 'Verify OTP';
+                }
+            });
+
+            // OTP input validation
+            otpInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.length === 6) {
+                    verifyOtpBtn.disabled = false;
+                } else {
+                    verifyOtpBtn.disabled = true;
+                }
+            });
+
+            // Form submission
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const saveBtn = document.getElementById('saveBtn');
+                const originalText = saveBtn.innerHTML;
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '⏳ Saving...';
+
+                try {
+                    const formData = {
+                        fullname: document.getElementById('fullname').value.trim(),
+                        phone: document.getElementById('phone').value.trim(),
+                        age: parseInt(document.getElementById('age').value),
+                        gender: document.getElementById('gender').value,
+                        occupation: document.getElementById('occupation').value.trim()
+                    };
+
+                    // Validate required fields
+                    if (!formData.fullname || !formData.phone || !formData.age || !formData.gender || !formData.occupation) {
+                        throw new Error('Please fill in all required fields');
+                    }
+
+                    const response = await fetch('/api/profile', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify(formData)
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showMessage('Profile updated successfully! ✓', 'success');
+                        // Optionally redirect after a delay
+                        setTimeout(() => {
+                            window.location.href = 'profile.html';
+                        }, 2000);
+                    } else {
+                        throw new Error(data.message || 'Failed to update profile');
+                    }
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    showMessage(error.message || 'Error updating profile. Please try again.', 'error');
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalText;
+                }
+            });
+
+            function showMessage(message, type) {
+                verificationMessage.innerHTML = `
+                    <div class="${type === 'success' ? 'success-message' : 'error-message'}">
+                        ${message}
+                    </div>
+                `;
+                setTimeout(() => {
+                    verificationMessage.innerHTML = '';
+                }, 5000);
+            }
+
+            // Check authentication
+            fetch('/api/user', { credentials: 'include' })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.loggedIn) {
+                        window.location.href = 'login.html';
+                    }
+                })
+                .catch(error => {
+                    console.error('Auth check error:', error);
+                    window.location.href = 'login.html';
+                });
+        });
+
+        // Logout function
+        async function logout() {
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Logged out successfully');
+                    window.location.href = 'index.html';
+                } else {
+                    throw new Error(data.message || 'Logout failed');
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Error logging out: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

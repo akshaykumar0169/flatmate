@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | Flatmate Finder</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .welcome-section h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5rem;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-bottom: 30px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 40px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-top: 4px solid #4CAF50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 280px;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .dashboard-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            margin-top: 15px;
+        }
+
+        .dashboard-card p {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .stats-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .quick-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            background: #ffebee;
+            border-radius: 8px;
+            color: #d32f2f;
+            margin: 20px 0;
+        }
+
+        /* Extra from 2nd block */
+        .logo-bold {
+            font-weight: 800;
+            font-size: 1.4rem;
+        }
+
+        .profile-menu {
+            position: relative;
+            list-style: none;
+        }
+
+        .profile-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #1a7a87;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 45px;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            min-width: 160px;
+            z-index: 10;
+        }
+
+        .profile-dropdown a {
+            display: block;
+            padding: 10px 14px;
+            text-decoration: none;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .profile-dropdown a:hover {
+            background: #f1f1f1;
+        }
+
+        /* Only show dropdown on click (removed hover functionality) */
+        .profile-menu.active .profile-dropdown {
+            display: block;
+        }
+
+        /* Button styling to match the image */
+        .btn {
+            padding: 12px 24px;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: background 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin-top: auto;
+        }
+
+        .btn:hover {
+            background: #45a049;
+        }
+
+        .btn-secondary {
+            background: #4CAF50;
+        }
+
+        .btn-outline {
+            background: #4CAF50;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                margin: 20px;
+                padding: 15px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .welcome-section h1 {
+                font-size: 2rem;
+            }
+
+            .quick-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="user-dashboard.html" class="logo">
+                <span class="home-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                        class="bi bi-house-door-fill" viewBox="0 0 16 16">
+                        <path
+                            d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5" />
+                    </svg>
+                </span>
+                <span class="logo-text">Flatmate <span class="logo-text">Finder</span></span>
+            </a>
+        </div>
+
+        <ul id="navbar-links">
+            <li id="profile-menu" class="profile-menu">
+                <div class="profile-icon" id="profile-icon">👤</div>
+                <div class="profile-dropdown">
+                    <a href="/profile.html" >My Profile</a>
+                    <a href="my-posts.html">My Posts</a>
+                    <a href="#" onclick="alert('Settings page coming soon!')">Settings</a>
+                    <a href="saved-posts.html">Saved Posts</a>
+                    <a href="#" id="logout-btn" onclick="logout()">Logout</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="dashboard-container">
+        <div id="loading" class="loading">
+            Loading your dashboard...
+        </div>
+
+        <div id="error" class="error" style="display: none;">
+            Error loading dashboard. Please try again.
+        </div>
+
+        <div id="dashboard-content" style="display: none;">
+            <section class="welcome-section">
+                <h1>Welcome back, <span id="user-name">User</span>!</h1>
+                <p class="welcome-subtitle">Manage your flatmate requirements and find your perfect roommate</p>
+            </section>
+
+            <section class="stats-section">
+                <h2 style="text-align: center; margin-bottom: 25px; color: #333;">Your Activity</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-posts">0</span>
+                        <div class="stat-label">Total Posts</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="recent-posts">0</span>
+                        <div class="stat-label">Recent Posts</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="profile-views">-</span>
+                        <div class="stat-label">Profile Views</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-grid">
+                <div class="dashboard-card">
+                    <span class="card-icon">📝</span>
+                    <h3>Post a Flatmate Requirement</h3>
+                    <p>Share your location, budget, and preferences.</p>
+                    <a href="post-requirement.html" class="btn">Post Now</a>
+                </div>
+
+                <div class="dashboard-card">
+                    <span class="card-icon">🔍</span>
+                    <h3>Search Flatmate Listings</h3>
+                    <p>Explore people who are looking for roommates.</p>
+                    <a href="search-listings.html" class="btn">Search Listings</a>
+                </div>
+
+                <div class="dashboard-card">
+                    <span class="card-icon">💬</span>
+                    <h3>Chat with Matches</h3>
+                    <p>Message others and connect securely.</p>
+                    <a href="chat.html" class="btn">Open Chat</a>
+                </div>
+
+                <div class="dashboard-card">
+                    <span class="card-icon">📊</span>
+                    <h3>My Posts</h3>
+                    <p>View or edit your flatmate requirements.</p>
+                    <a href="my-posts.html" class="btn">View My Posts</a>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Flatmate Finder. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let currentUser = null;
+        let userPosts = [];
+
+        async function loadDashboard() {
+            try {
+                // Check if user is logged in
+                const authResponse = await fetch('/api/user', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const authData = await authResponse.json();
+
+                if (!authData.success || !authData.loggedIn) {
+                    alert('Please log in to access your dashboard');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                currentUser = authData;
+
+                // Load user profile
+                const profileResponse = await fetch('/api/profile', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (profileResponse.ok) {
+                    const profileData = await profileResponse.json();
+                    if (profileData.success) {
+                        document.getElementById('user-name').textContent = profileData.fullname || authData.userName || 'User';
+                    }
+                }
+
+                // Load user posts for statistics
+                const postsResponse = await fetch('/api/my-posts', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (postsResponse.ok) {
+                    userPosts = await postsResponse.json();
+                    updateStats();
+                }
+
+                // Show dashboard content
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard-content').style.display = 'block';
+
+            } catch (error) {
+                console.error('Dashboard loading error:', error);
+                showError('Error loading dashboard. Please try again.');
+            }
+        }
+
+        function updateStats() {
+            const totalPosts = userPosts.length;
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+            const recentPosts = userPosts.filter(post => {
+                const postDate = new Date(post.createdAt);
+                return postDate > thirtyDaysAgo;
+            }).length;
+
+            document.getElementById('total-posts').textContent = totalPosts;
+            document.getElementById('recent-posts').textContent = recentPosts;
+
+            // Profile views is a placeholder for now
+            document.getElementById('profile-views').textContent = totalPosts > 0 ? Math.floor(Math.random() * 50) + 10 : 0;
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error').textContent = message;
+        }
+
+        async function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    const response = await fetch('/logout', {
+                        method: 'POST',
+                        credentials: 'include'
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        // Clear any stored user data
+                        localStorage.removeItem('loggedInUserEmail');
+                        localStorage.removeItem('loggedInUserName');
+                        localStorage.removeItem('loggedInUserId');
+
+                        alert('Logged out successfully');
+                        window.location.href = 'index.html';
+                    } else {
+                        alert('Error logging out. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    alert('Error logging out. Please try again.');
+                }
+            }
+        }
+
+        // Profile dropdown click functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            
+            const profileMenu = document.getElementById('profile-menu');
+            const profileIcon = document.getElementById('profile-icon');
+            
+            profileIcon.addEventListener('click', function(e) {
+                e.stopPropagation();
+                profileMenu.classList.toggle('active');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function() {
+                profileMenu.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+
+</html>

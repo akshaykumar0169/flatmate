@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Posts - Flatmate Finder</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            padding: 15px 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        .navbar a:hover {
+            opacity: 0.8;
+        }
+
+        .saved-posts-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .saved-posts-header {
+            margin-bottom: 30px;
+        }
+
+        .saved-posts-header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .saved-posts-header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .saved-posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .saved-post-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .saved-post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .post-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
+        }
+
+        .post-content {
+            padding: 20px;
+        }
+
+        .post-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .post-location {
+            color: #666;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .post-details {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .post-tag {
+            padding: 6px 12px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .post-poster {
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #666;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 6px;
+        }
+
+        .post-poster strong {
+            color: #333;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-unsave {
+            flex: 1;
+            padding: 12px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-unsave:hover {
+            background: #d32f2f;
+        }
+
+        .btn-chat {
+            flex: 1;
+            padding: 12px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-chat:hover {
+            background: #1976D2;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #666;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .empty-state p {
+            margin-bottom: 25px;
+            color: #666;
+        }
+
+        .empty-state a {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .empty-state a:hover {
+            background: #45a049;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .saved-posts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .saved-posts-header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="user-dashboard.html" class="logo">
+                <span class="home-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                        class="bi bi-house-door-fill" viewBox="0 0 16 16">
+                        <path
+                            d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5" />
+                    </svg>
+                </span>
+                <span class="logo-text">Flatmate <span class="logo-text">Finder</span></span>
+            </a>
+        </div>
+        <ul id="navbar-links">
+            <li id="profile-menu" class="profile-menu">
+                <a href="user-dashboard.html" id="profile-icon" class="profile-icon">👤</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="saved-posts-container">
+        <div class="saved-posts-header">
+            <h1>💾 Saved Posts</h1>
+            <p>View all your bookmarked flatmate listings</p>
+        </div>
+
+        <div class="saved-posts-grid" id="savedPostsGrid">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #4CAF50;"></i>
+                <p>Loading saved posts...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUserId = null;
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('http://localhost:3000/api/user', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (!data.loggedIn) {
+                    alert('Please login to view saved posts');
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                
+                currentUserId = data.userId;
+                return true;
+            } catch (error) {
+                console.error('Auth check error:', error);
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+
+        // Load saved posts
+        async function loadSavedPosts() {
+            try {
+                const response = await fetch('http://localhost:3000/api/saved-posts', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+
+                const grid = document.getElementById('savedPostsGrid');
+
+                if (data.success && data.data.length > 0) {
+                    grid.innerHTML = data.data.map(post => {
+                        const posterName = post.userId?.fullname || 'Unknown';
+                        const posterEmail = post.userId?.email || '';
+                        const posterId = post.userId?._id || '';
+                        const imageUrl = post.images && post.images.length > 0 
+                            ? `http://localhost:3000${post.images}`
+                            : '';
+
+                        return `
+                            <div class="saved-post-card">
+                                ${imageUrl ? `<img src="${imageUrl}" alt="Property" class="post-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'%3E%3Crect fill=\\'%23e0e0e0\\' width=\\'100\\' height=\\'100\\'/%3E%3Ctext fill=\\'%23999\\' x=\\'50%25\\' y=\\'50%25\\' text-anchor=\\'middle\\' dy=\\'.3em\\'%3ENo Image%3C/text%3E%3C/svg%3E'">` : '<div class="post-image"></div>'}
+                                <div class="post-content">
+                                    <div class="post-price">₹${post.price?.toLocaleString() || 'N/A'}/month</div>
+                                    <div class="post-location">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        ${post.location || 'N/A'}, ${post.city || 'N/A'}, ${post.state || 'N/A'}
+                                    </div>
+                                    <div class="post-details">
+                                        <span class="post-tag"><i class="fas fa-couch"></i> ${post.furnishing || 'N/A'}</span>
+                                        <span class="post-tag"><i class="fas fa-users"></i> ${post.gender || 'Any'}</span>
+                                    </div>
+                                    <div class="post-poster">
+                                        Posted by: <strong>${escapeHtml(posterName)}</strong>
+                                    </div>
+                                    <div class="post-actions">
+                                        <button class="btn-unsave" onclick="unsavePost('${post._id}')">
+                                            <i class="fas fa-trash"></i> Unsave
+                                        </button>
+                                        <button class="btn-chat" onclick="startChat('${posterId}', '${escapeHtml(posterName)}')">
+                                            <i class="fas fa-comments"></i> Chat
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">💾</div>
+                            <h3>No saved posts yet</h3>
+                            <p>Start saving posts from the search page to see them here</p>
+                            <a href="search-listings.html">
+                                <i class="fas fa-search"></i> Search Listings
+                            </a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Load saved posts error:', error);
+                document.getElementById('savedPostsGrid').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <h3>Error loading saved posts</h3>
+                        <p>Please try again later</p>
+                        <a href="user-dashboard.html">Go to Dashboard</a>
+                    </div>
+                `;
+            }
+        }
+
+        // Unsave post
+        async function unsavePost(postId) {
+            if (!confirm('Remove this post from your saved list?')) return;
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/save-post/${postId}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Reload saved posts
+                    await loadSavedPosts();
+                } else {
+                    alert('Failed to unsave post. Please try again.');
+                }
+            } catch (error) {
+                console.error('Unsave error:', error);
+                alert('Error unsaving post. Please try again.');
+            }
+        }
+
+        // Start chat with post creator
+        async function startChat(otherUserId, otherUserName) {
+            if (!otherUserId) {
+                alert('Cannot chat with this user (user not found)');
+                return;
+            }
+
+            if (otherUserId === currentUserId) {
+                alert('Cannot chat with yourself!');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/conversations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ otherUserId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Redirect to chat page with conversation ID
+                    window.location.href = `chat.html?conversation=${data.conversation._id}`;
+                } else {
+                    alert('Failed to start conversation. Please try again.');
+                }
+            } catch (error) {
+                console.error('Start chat error:', error);
+                alert('Error starting conversation. Please try again.');
+            }
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize on page load
+        (async () => {
+            const isAuthenticated = await checkAuth();
+            if (isAuthenticated) {
+                await loadSavedPosts();
+            }
+        })();
+    </script>
+</body>
+</html>
