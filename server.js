@@ -3,17 +3,17 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
-// const fs = require('fs'); // No longer needed
 const session = require('express-session');
 const http = require('http');
 const socketIO = require('socket.io');
-const nodemailer = require('nodemailer');
-const cloudinary = require('cloudinary').v2; // <-- ADDED
-const { CloudinaryStorage } = require('multer-storage-cloudinary'); // <-- ADDED
+const nodemailer = require('nodemailer'); // We keep this line, though we won't use the transporter
+const sgMail = require('@sendgrid/mail'); // <-- ADDED: SendGrid mail service
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 require('dotenv').config();
 
 const app = express();
-app.set('trust proxy', 1); // <-- ADDED for Render deployment
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 const io = socketIO(server, {
     cors: {
@@ -24,14 +24,23 @@ const io = socketIO(server, {
 const PORT = process.env.PORT || 3000;
 
 // ============================================================================
-// CLOUDINARY CONFIGURATION (NEW)
+// CLOUDINARY CONFIGURATION
 // ============================================================================
-// This reads the credentials from your .env file
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
+
+// ============================================================================
+// SENDGRID CONFIGURATION (NEW)
+// ============================================================================
+if (process.env.SENDGRID_API_KEY) {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    console.log('✅ SendGrid API Key configured');
+} else {
+    console.log('❌ SendGrid API Key not found. Email will fail.');
+}
 
 //MIDWARE
 app.use(express.urlencoded({ extended: true }));
@@ -47,7 +56,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production', // <-- MODIFIED for Render (HTTPS)
+        secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
@@ -55,20 +64,16 @@ app.use(session({
 
 // Serve static files
 app.use(express.static(__dirname));
-// app.use('/uploads', ...); // <-- REMOVED (no longer needed)
-
-// Ensure upload directory exists (REMOVED)
 
 // ============================================================================
-// MULTER SETUP FOR IMAGE UPLOADS (REPLACED WITH CLOUDINARY)
+// MULTER SETUP FOR IMAGE UPLOADS (CLOUDINARY)
 // ============================================================================
 
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'flatmate-finder-uploads', // This will create a folder in Cloudinary
+        folder: 'flatmate-finder-uploads',
         allowed_formats: ['jpeg', 'jpg', 'png', 'gif']
-        // You can add transformations here if you want
     }
 });
 
@@ -135,7 +140,7 @@ const postSchema = new mongoose.Schema({
 
 const Requirement = mongoose.model('Requirement', postSchema);
 
-// SavedPost Schema (NEW)
+// SavedPost Schema
 const savedPostSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Requirement', required: true },
@@ -145,7 +150,7 @@ const savedPostSchema = new mongoose.Schema({
 savedPostSchema.index({ userId: 1, postId: 1 }, { unique: true });
 const SavedPost = mongoose.model('SavedPost', savedPostSchema);
 
-// Conversation Schema (NEW)
+// Conversation Schema
 const conversationSchema = new mongoose.Schema({
     participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
     lastMessage: { type: String, default: '' },
@@ -156,7 +161,7 @@ const conversationSchema = new mongoose.Schema({
 conversationSchema.index({ participants: 1 });
 const Conversation = mongoose.model('Conversation', conversationSchema);
 
-// Message Schema (NEW)
+// Message Schema
 const messageSchema = new mongoose.Schema({
     conversationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Conversation', required: true },
     senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -169,7 +174,7 @@ const messageSchema = new mongoose.Schema({
 messageSchema.index({ conversationId: 1, createdAt: -1 });
 const Message = mongoose.model('Message', messageSchema);
 
-// OTP Schema (NEW)
+// OTP Schema
 const otpSchema = new mongoose.Schema({
     email: { type: String, required: true },
     otp: { type: String, required: true },
@@ -193,27 +198,11 @@ function requireAuth(req, res, next) {
 }
 
 // ============================================================================
-// EMAIL CONFIGURATION (NODEMAILER)
+// EMAIL CONFIGURATION (NODEMAILER) - REMOVED
 // ============================================================================
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS // IMPORTANT: Use a 16-digit Google App Password here
-    }
-});
-
-// Verify transporter configuration
-if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-    transporter.verify((error, success) => {
-        if (error) {
-            console.log('❌ Email transporter error:', error);
-        } else {
-            console.log('✅ Email server is ready');
-        }
-    });
-}
+// const transporter = nodemailer.createTransport({ ... }); // <-- REMOVED
+// We are now using SendGrid, configured at the top of the file.
 
 // ============================================================================
 // ROUTES - BASIC
@@ -442,7 +431,7 @@ app.put('/api/profile', requireAuth, async (req, res) => {
 
     } catch (error) {
         console.error('Update profile error:', error);
-        res.status(500).json({ // <-- FIXED TYPO (was 5Z)
+        res.status(500).json({
             success: false,
             message: 'Server error updating profile'
         });
@@ -450,7 +439,7 @@ app.put('/api/profile', requireAuth, async (req, res) => {
 });
 
 // ============================================================================
-// ROUTES - EMAIL OTP VERIFICATION (NEW)
+// ROUTES - EMAIL OTP VERIFICATION (MODIFIED FOR SENDGRID)
 // ============================================================================
 
 // Send OTP
@@ -474,10 +463,10 @@ app.post('/api/send-otp', requireAuth, async (req, res) => {
         // Save new OTP
         await new OTP({ email: user.email, otp }).save();
 
-        // Send email
+        // Send email using SendGrid
         const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: user.email,
+            to: user.email, // <-- The user's email address
+            from: process.env.VERIFIED_SENDER, // <-- Your verified SendGrid sender email
             subject: 'Email Verification OTP - Flatmate Finder',
             html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -495,9 +484,10 @@ app.post('/api/send-otp', requireAuth, async (req, res) => {
       `
         };
 
-        await transporter.sendMail(mailOptions);
+        // await transporter.sendMail(mailOptions); // <-- OLD WAY (REMOVED)
+        await sgMail.send(mailOptions); // <-- NEW WAY (SENDGRID)
 
-        console.log('✅ OTP sent to:', user.email);
+        console.log('✅ OTP sent to:', user.email, 'via SendGrid');
 
         res.json({
             success: true,
@@ -506,6 +496,10 @@ app.post('/api/send-otp', requireAuth, async (req, res) => {
 
     } catch (error) {
         console.error('Send OTP error:', error);
+        // Add this to see details from SendGrid if it fails
+        if (error.response) {
+            console.error(error.response.body)
+        }
         res.status(500).json({
             success: false,
             message: 'Error sending OTP. Please check email configuration.'
@@ -564,8 +558,7 @@ app.post('/api/verify-otp', requireAuth, async (req, res) => {
 // Create Post
 app.post('/api/post-requirement', requireAuth, upload.array('images', 3), async (req, res) => {
     try {
-        // const images = req.files ? req.files.map(f => '/uploads/' + f.filename) : []; // <-- OLD WAY
-        const images = req.files ? req.files.map(f => f.path) : []; // <-- NEW: Get Cloudinary URL
+        const images = req.files ? req.files.map(f => f.path) : []; // <-- Get Cloudinary URL
         const prefs = Array.isArray(req.body.prefs) ? req.body.prefs : req.body.prefs ? [req.body.prefs] : [];
         const { price, furnishing, state, city, location, gender, notes } = req.body;
 
@@ -586,8 +579,7 @@ app.post('/api/post-requirement', requireAuth, upload.array('images', 3), async 
         await post.save();
         console.log('✅ New post created by:', req.session.userEmail);
 
-        // res.status(201).json({ ... }); // <-- OLD WAY (Bad for HTML forms)
-        res.redirect('/my-posts.html'); // <-- NEW: Redirect user after success
+        res.redirect('/my-posts.html');
 
     } catch (err) {
         console.error('Post creation error:', err);
@@ -709,7 +701,7 @@ app.get('/api/search-flatmates', async (req, res) => {
 });
 
 // ============================================================================
-// ROUTES - SAVED POSTS (NEW)
+// ROUTES - SAVED POSTS
 // ============================================================================
 
 // Save Post
@@ -828,7 +820,7 @@ app.get('/api/check-saved/:postId', requireAuth, async (req, res) => {
 });
 
 // ============================================================================
-// ROUTES - CHAT (NEW)
+// ROUTES - CHAT
 // ============================================================================
 
 // Get All Conversations
@@ -921,7 +913,7 @@ app.get('/api/messages/:conversationId', requireAuth, async (req, res) => {
         });
 
         if (!conversation) {
-            return res.status(403).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Access denied'
             });
@@ -1001,7 +993,7 @@ app.post('/api/messages', requireAuth, async (req, res) => {
 
     } catch (error) {
         console.error('Send message error:', error);
-        res.status(500).json({ // <-- FIXED TYPO (was 5M)
+        res.status(500).json({
             success: false,
             message: 'Error sending message'
         });
@@ -1041,14 +1033,14 @@ server.listen(PORT, () => {
     console.log(`📡 Server URL:        http://localhost:${PORT}`);
     console.log(`💾 MongoDB:           ${MONGODB_URI}`);
     console.log(`💬 Socket.IO:         Enabled`);
-    console.log(`📧 Email OTP:         ${process.env.EMAIL_USER ? '✅ Configured' : '❌ Not configured'}`);
-    console.log(`🖼️ Cloudinary:        ${process.env.CLOUDINARY_CLOUD_NAME ? '✅ Configured' : '❌ Not configured'}`); // <-- ADDED
+    console.log(`📧 Email:             ${process.env.SENDGRID_API_KEY ? '✅ Configured (SendGrid)' : '❌ Not configured'}`);
+    console.log(`🖼️ Cloudinary:        ${process.env.CLOUDINARY_CLOUD_NAME ? '✅ Configured' : '❌ Not configured'}`);
     console.log('='.repeat(70));
     console.log('\n📋 Features Available:');
     console.log('  ✅ User Authentication & Profile Management');
-    console.log('  ✅ Post Creation & Search (with Cloudinary)'); // <-- MODIFIED
+    console.log('  ✅ Post Creation & Search (with Cloudinary)');
     console.log('  ✅ Real-time Chat (Socket.IO)');
     console.log('  ✅ Save Posts');
-    console.log('  ✅ Email OTP Verification');
+    console.log('  ✅ Email OTP Verification (SendGrid)');
     console.log('\n' + '='.repeat(70) + '\n');
 });
