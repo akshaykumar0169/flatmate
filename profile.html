@@ -504,13 +504,11 @@
     </nav>
 
     <div class="profile-container">
-        <!-- Header Section -->
         <div class="profile-header">
             <h1>My Profile</h1>
             <p class="header-subtitle">Manage your account information</p>
         </div>
 
-        <!-- Stats Section -->
         <div class="stats-section">
             <div class="stat-card">
                 <div class="stat-number">3</div>
@@ -522,47 +520,33 @@
             </div>
         </div>
 
-        <!-- Profile Information Section -->
         <div class="profile-info">
             <div class="info-row">
                 <span class="info-label">Full Name</span>
-                <span class="info-value">Sejal</span>
+                <span class="info-value">Loading...</span>
             </div>
-
-            <div class="info-item">
-                <label>Email:</label>
-                <span id="userEmail">Loading...</span>
+            <div class="info-row">
+                <span class="info-label">Email Address</span>
+                <span class="info-value">Loading...</span>
             </div>
-            <div class="info-item">
-                <label>Email Status:</label>
-                <span id="emailVerificationStatus">
-                    <span class="verification-badge" id="verificationBadge">Checking...</span>
-                </span>
-            </div>
-
-
             <div class="info-row">
                 <span class="info-label">Phone Number</span>
-                <span class="info-value">9142357813</span>
+                <span class="info-value">Loading...</span>
             </div>
-
             <div class="info-row">
                 <span class="info-label">Age</span>
-                <span class="info-value">22</span>
+                <span class="info-value">Loading...</span>
             </div>
-
             <div class="info-row">
                 <span class="info-label">Gender</span>
-                <span class="info-value">Female</span>
+                <span class="info-value">Loading...</span>
             </div>
-
             <div class="info-row">
                 <span class="info-label">Occupation</span>
-                <span class="info-value">Student</span>
+                <span class="info-value">Loading...</span>
             </div>
         </div>
 
-        <!-- Action Buttons -->
         <div class="action-buttons">
             <a href="edit-profile.html" class="btn btn-edit">
                 <i class="fas fa-edit"></i> Edit Profile
@@ -576,9 +560,8 @@
         </div>
 
 
-        <!-- Member Since -->
         <div class="member-since">
-            <p><em>Member since: September 29, 2025</em></p>
+            <p><em>Loading member data...</em></p>
         </div>
     </div>
 
@@ -645,62 +628,26 @@
             }
         }
 
-        // Fetch and display email verification status
-        async function loadEmailVerificationStatus() {
-            try {
-                const response = await fetch('http://localhost:3000/api/profile', {
-                    credentials: 'include'
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    const badge = document.getElementById('verificationBadge');
-                    const emailSpan = document.getElementById('userEmail');
-
-                    // Display email
-                    if (emailSpan) {
-                        emailSpan.textContent = data.email;
-                    }
-
-                    // Display verification status
-                    if (badge) {
-                        if (data.emailVerified) {
-                            badge.className = 'verification-badge verified';
-                            badge.innerHTML = '<i class="fas fa-check-circle"></i> Verified';
-                        } else {
-                            badge.className = 'verification-badge not-verified';
-                            badge.innerHTML = '<i class="fas fa-exclamation-circle"></i> Not Verified';
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading verification status:', error);
-                const badge = document.getElementById('verificationBadge');
-                if (badge) {
-                    badge.className = 'verification-badge';
-                    badge.textContent = 'Error loading status';
-                }
-            }
-        }
-
-        // Call this function when page loads
-        window.addEventListener('DOMContentLoaded', loadEmailVerificationStatus);
+        // <-- REMOVED loadEmailVerificationStatus function -->
+        // <-- It was redundant. renderProfile now handles this. -->
 
         function renderProfile(user) {
-            const isVerified = user.isVerified; // boolean value from backend
+            // <-- ***FIXED HERE*** -->
+            // Changed 'user.isVerified' to 'user.emailVerified'
+            // to match the data from server.js
+            const isVerified = user.emailVerified; 
 
             // Update profile information with fetched data
             const profileInfo = document.querySelector('.profile-info');
             profileInfo.innerHTML = `
         <div class="info-row">
             <span class="info-label">Full Name</span>
-            <span class="info-value">${user.fullname || "Sejal"}</span>
+            <span class="info-value">${user.fullname || "N/A"}</span>
         </div>
         <div class="info-row">
             <span class="info-label">Email Address</span>
             <div class="email-container">
-                <span class="info-value">${user.email || "guptasejal9876@gmail.com"}</span>
+                <span class="info-value">${user.email || "N/A"}</span>
                 ${isVerified
                     ? `<span class="verified">✔ Verified</span>`
                     : `<span class="not-verified">✗ Not Verified</span>`
@@ -709,26 +656,30 @@
         </div>
         <div class="info-row">
             <span class="info-label">Phone Number</span>
-            <span class="info-value">${user.phone || "9142357813"}</span>
+            <span class="info-value">${user.phone || "N/A"}</span>
         </div>
         <div class="info-row">
             <span class="info-label">Age</span>
-            <span class="info-value">${user.age || "22"}</span>
+            <span class="info-value">${user.age || "N/A"}</span>
         </div>
         <div class="info-row">
             <span class="info-label">Gender</span>
-            <span class="info-value">${user.gender || "Female"}</span>
+            <span class="info-value">${user.gender || "N/A"}</span>
         </div>
         <div class="info-row">
             <span class="info-label">Occupation</span>
-            <span class="info-value">${user.occupation || "Student"}</span>
+            <span class="info-value">${user.occupation || "N/A"}</span>
         </div>
     `;
 
             // Update member since date
             if (user.createdAt) {
                 const memberSince = document.querySelector('.member-since p');
-                memberSince.innerHTML = `<em>Member since: ${new Date(user.createdAt).toLocaleDateString()}</em>`;
+                // Format date for better readability
+                const joinDate = new Date(user.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'long', day: 'numeric'
+                });
+                memberSince.innerHTML = `<em>Member since: ${joinDate}</em>`;
             }
         }
 
@@ -761,7 +712,9 @@
             // You can add error display logic here
         }
 
-        async function logout() {
+        async function logout(event) {
+            // Prevent the <a> tag from navigating
+            event.preventDefault(); 
             try {
                 const response = await fetch('/logout', {
                     method: 'POST',
@@ -786,7 +739,8 @@
             // Add logout functionality to logout button
             const logoutBtn = document.querySelector('.btn-logout');
             if (logoutBtn) {
-                logoutBtn.addEventListener('click', logout);
+                // Pass the event object to the function
+                logoutBtn.addEventListener('click', logout); 
             }
         });
     </script>
