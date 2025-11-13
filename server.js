@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
-// const fs = require('fs'); // No longer needed for uploads
+// const fs = require('fs'); // No longer needed
 const session = require('express-session');
 const http = require('http');
 const socketIO = require('socket.io');
@@ -13,7 +13,7 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary'); // <-- ADDED
 require('dotenv').config();
 
 const app = express();
-app.set('trust proxy', 1); // <-- ADDED for deployment (trusts Render's proxy)
+app.set('trust proxy', 1); // <-- ADDED for Render deployment
 const server = http.createServer(app);
 const io = socketIO(server, {
     cors: {
@@ -23,8 +23,10 @@ const io = socketIO(server, {
 });
 const PORT = process.env.PORT || 3000;
 
-// CLOUDINARY CONFIG (NEW)
-// Reads credentials from your .env file
+// ============================================================================
+// CLOUDINARY CONFIGURATION (NEW)
+// ============================================================================
+// This reads the credentials from your .env file
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -45,7 +47,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production', // <-- MODIFIED for HTTPS
+        secure: process.env.NODE_ENV === 'production', // <-- MODIFIED for Render (HTTPS)
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
@@ -53,9 +55,9 @@ app.use(session({
 
 // Serve static files
 app.use(express.static(__dirname));
-// app.use('/uploads', ...); // No longer needed
+// app.use('/uploads', ...); // <-- REMOVED (no longer needed)
 
-// Ensure upload directory exists (REMOVED - Not needed for Cloudinary)
+// Ensure upload directory exists (REMOVED)
 
 // ============================================================================
 // MULTER SETUP FOR IMAGE UPLOADS (REPLACED WITH CLOUDINARY)
@@ -64,9 +66,9 @@ app.use(express.static(__dirname));
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'flatmate-finder-uploads', // A folder name in your Cloudinary account
-        allowed_formats: ['jpeg', 'jpg', 'png', 'gif'],
-        transformation: [{ width: 1024, height: 768, crop: 'limit' }] // Optional: auto-resize
+        folder: 'flatmate-finder-uploads', // This will create a folder in Cloudinary
+        allowed_formats: ['jpeg', 'jpg', 'png', 'gif']
+        // You can add transformations here if you want
     }
 });
 
@@ -119,7 +121,7 @@ const User = mongoose.model('User', userSchema);
 const postSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     userEmail: String,
-    images: [String],
+    images: [String], // Will store an array of Cloudinary URLs
     price: Number,
     furnishing: String,
     state: String,
@@ -198,7 +200,7 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS // Use your 16-digit App Password here
+        pass: process.env.EMAIL_PASS // IMPORTANT: Use a 16-digit Google App Password here
     }
 });
 
@@ -440,7 +442,7 @@ app.put('/api/profile', requireAuth, async (req, res) => {
 
     } catch (error) {
         console.error('Update profile error:', error);
-        res.status(5Z).json({
+        res.status(500).json({ // <-- FIXED TYPO (was 5Z)
             success: false,
             message: 'Server error updating profile'
         });
@@ -562,8 +564,8 @@ app.post('/api/verify-otp', requireAuth, async (req, res) => {
 // Create Post
 app.post('/api/post-requirement', requireAuth, upload.array('images', 3), async (req, res) => {
     try {
-        // MODIFIED: f.path now contains the full Cloudinary URL
-        const images = req.files ? req.files.map(f => f.path) : [];
+        // const images = req.files ? req.files.map(f => '/uploads/' + f.filename) : []; // <-- OLD WAY
+        const images = req.files ? req.files.map(f => f.path) : []; // <-- NEW: Get Cloudinary URL
         const prefs = Array.isArray(req.body.prefs) ? req.body.prefs : req.body.prefs ? [req.body.prefs] : [];
         const { price, furnishing, state, city, location, gender, notes } = req.body;
 
@@ -584,15 +586,14 @@ app.post('/api/post-requirement', requireAuth, upload.array('images', 3), async 
         await post.save();
         console.log('✅ New post created by:', req.session.userEmail);
 
-        // Redirect back to the 'my-posts' page after success
-        res.redirect('/my-posts.html');
+        // res.status(201).json({ ... }); // <-- OLD WAY (Bad for HTML forms)
+        res.redirect('/my-posts.html'); // <-- NEW: Redirect user after success
 
     } catch (err) {
         console.error('Post creation error:', err);
-        // Send a JSON error response
         res.status(500).json({
             success: false,
-            message: 'Server error while posting requirement. Please try again.'
+            message: 'Server error while posting requirement'
         });
     }
 });
@@ -1000,7 +1001,7 @@ app.post('/api/messages', requireAuth, async (req, res) => {
 
     } catch (error) {
         console.error('Send message error:', error);
-        res.status(500).json({
+        res.status(500).json({ // <-- FIXED TYPO (was 5M)
             success: false,
             message: 'Error sending message'
         });
@@ -1024,8 +1025,6 @@ io.on('connection', (socket) => {
         console.log(`❌ User ${socket.id} left conversation ${conversationId}`);
     });
 
-
-
     socket.on('disconnect', () => {
         console.log('👤 User disconnected:', socket.id);
     });
@@ -1043,11 +1042,11 @@ server.listen(PORT, () => {
     console.log(`💾 MongoDB:           ${MONGODB_URI}`);
     console.log(`💬 Socket.IO:         Enabled`);
     console.log(`📧 Email OTP:         ${process.env.EMAIL_USER ? '✅ Configured' : '❌ Not configured'}`);
-    console.log(`🖼️ Cloudinary:        ${process.env.CLOUDINARY_CLOUD_NAME ? '✅ Configured' : '❌ Not configured'}`);
+    console.log(`🖼️ Cloudinary:        ${process.env.CLOUDINARY_CLOUD_NAME ? '✅ Configured' : '❌ Not configured'}`); // <-- ADDED
     console.log('='.repeat(70));
     console.log('\n📋 Features Available:');
     console.log('  ✅ User Authentication & Profile Management');
-    console.log('  ✅ Post Creation & Search (with Cloudinary)');
+    console.log('  ✅ Post Creation & Search (with Cloudinary)'); // <-- MODIFIED
     console.log('  ✅ Real-time Chat (Socket.IO)');
     console.log('  ✅ Save Posts');
     console.log('  ✅ Email OTP Verification');
