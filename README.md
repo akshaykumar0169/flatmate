@@ -34,14 +34,25 @@ A fully functional flatmate finder website with user authentication, profile man
 
 flatmate_finder_complete/
 ├── server.js                    # Main server file
+
 ├── package.json                 # Dependencies and scripts
+
 ├── uploads/                     # Image uploads directory
+
 ├── index.html                   # Home page
+
 ├── signup.html                  # User registration
+
 ├── login.html                   # User login
+
 ├── user-dashboard.html          # User dashboard
+
 ├── profile.html                 # User profile page
+
 ├── my-posts.html               # User's posts page
+
 ├── post-requirement.html        # Create new post
+
 ├── post-requirement-auth.js     # Authentication for posting
+
 └── styles.css                   # Styling
