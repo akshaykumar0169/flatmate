@@ -534,7 +534,7 @@
                                 Verify OTP
                             </button>
                         </div>
-                        <div class="help-text">Check your email for the verification code (expires in 5 minutes)</div>
+                        <div class="help-text">Check your email for the verification code (expires in 10 minutes)</div>
                     </div>
 
                     <div id="verificationMessage"></div>
@@ -642,6 +642,7 @@
                     `;
                     statusElement.className = 'verification-status verified';
                     actionsElement.style.display = 'none';
+                    otpSection.classList.remove('show'); // Hide OTP section if already verified
                 } else {
                     statusElement.innerHTML = `
                         <span class="not-verified-cross">✗</span>
@@ -829,7 +830,9 @@
         // Logout function
         async function logout() {
             try {
-                const response = await fetch('/api/auth/logout', {
+                // <-- ***FIXED HERE*** -->
+                // Changed '/api/auth/logout' to '/logout' to match server.js
+                const response = await fetch('/logout', {
                     method: 'POST',
                     credentials: 'include'
                 });
