@@ -256,7 +256,6 @@
     </nav>
 
     <div class="chat-container">
-        <!-- Conversations List Panel -->
         <div class="conversations-panel">
             <div class="conversations-header">
                 <h2>💬 Messages</h2>
@@ -270,7 +269,6 @@
             </div>
         </div>
 
-        <!-- Chat Panel -->
         <div class="chat-panel">
             <div class="chat-header" id="chatHeader">
                 <h3>Select a conversation</h3>
@@ -297,7 +295,8 @@
 
         // Initialize Socket.IO
         function initSocket() {
-            socket = io('http://localhost:3000');
+            // ***FIXED: Connect to the origin server, not localhost***
+            socket = io();
 
             socket.on('new-message', (message) => {
                 console.log('📨 New message received:', message);
@@ -326,7 +325,8 @@
         // Check authentication
         async function checkAuth() {
             try {
-                const response = await fetch('http://localhost:3000/api/user', {
+                // ***FIXED: Use relative path***
+                const response = await fetch('/api/user', {
                     credentials: 'include'
                 });
                 const data = await response.json();
@@ -349,7 +349,8 @@
         // Load conversations
         async function loadConversations() {
             try {
-                const response = await fetch('http://localhost:3000/api/conversations', {
+                // ***FIXED: Use relative path***
+                const response = await fetch('/api/conversations', {
                     credentials: 'include'
                 });
                 const data = await response.json();
@@ -408,7 +409,8 @@
         // Load messages
         async function loadMessages(conversationId) {
             try {
-                const response = await fetch(`http://localhost:3000/api/messages/${conversationId}`, {
+                // ***FIXED: Use relative path***
+                const response = await fetch(`/api/messages/${conversationId}`, {
                     credentials: 'include'
                 });
                 const data = await response.json();
@@ -472,7 +474,8 @@
             if (!message || !currentConversation) return;
 
             try {
-                const response = await fetch('http://localhost:3000/api/messages', {
+                // ***FIXED: Use relative path***
+                const response = await fetch('/api/messages', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
