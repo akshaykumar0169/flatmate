@@ -481,7 +481,7 @@
                     <a href="profile.html">My Profile</a>
                     <a href="my-posts.html">My Posts</a>
                     <a href="#" onclick="alert('Settings page coming soon!')">Settings</a>
-                    <a href="#" id="logout-btn" onclick="logout()">Logout</a>
+                    <a href="#" id="logout-btn" onclick="logout(event)">Logout</a>
                 </div>
             </li>
         </ul>
@@ -600,6 +600,7 @@
 
             async function loadProfile() {
                 try {
+                    // (relative path is correct)
                     const response = await fetch('/api/profile', {
                         credentials: 'include'
                     });
@@ -664,6 +665,7 @@
                 sendOtpBtn.textContent = 'Sending...';
 
                 try {
+                    // (relative path is correct)
                     const response = await fetch('/api/send-otp', {
                         method: 'POST',
                         credentials: 'include',
@@ -710,6 +712,7 @@
                 verifyOtpBtn.textContent = 'Verifying...';
 
                 try {
+                    // (relative path is correct)
                     const response = await fetch('/api/verify-otp', {
                         method: 'POST',
                         credentials: 'include',
@@ -773,6 +776,7 @@
                         throw new Error('Please fill in all required fields');
                     }
 
+                    // (relative path is correct)
                     const response = await fetch('/api/profile', {
                         method: 'PUT',
                         headers: {
@@ -813,7 +817,7 @@
                 }, 5000);
             }
 
-            // Check authentication
+            // Check authentication (relative path is correct)
             fetch('/api/user', { credentials: 'include' })
                 .then(response => response.json())
                 .then(data => {
@@ -828,10 +832,11 @@
         });
 
         // Logout function
-        async function logout() {
+        // ***FIXED: Accept event and call preventDefault***
+        async function logout(event) {
+            event.preventDefault(); 
             try {
-                // <-- ***FIXED HERE*** -->
-                // Changed '/api/auth/logout' to '/logout' to match server.js
+                // (relative path is correct)
                 const response = await fetch('/logout', {
                     method: 'POST',
                     credentials: 'include'
