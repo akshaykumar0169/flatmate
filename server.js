@@ -709,6 +709,69 @@ app.get('/api/search-flatmates', async (req, res) => {
 });
 
 // ============================================================================
+// *** NEW *** - DELETE POST ROUTE
+// ============================================================================
+app.delete('/api/my-posts/:postId', requireAuth, async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const userId = req.session.userId;
+
+        // Find the post to ensure it belongs to the user and to get image URLs
+        const post = await Requirement.findOne({ _id: postId, userId: userId });
+
+        if (!post) {
+            return res.status(403).json({
+                success: false,
+                message: 'Post not found or you are not authorized to delete it.'
+            });
+        }
+
+        // Delete images from Cloudinary
+        if (post.images && post.images.length > 0) {
+            console.log('Deleting images from Cloudinary...');
+            const deletePromises = post.images.map(imageUrl => {
+                // Extract public_id from the URL
+                // e.g., http://res.cloudinary.com/name/image/upload/v123/folder/public_id.jpg
+                // We need "folder/public_id"
+                const match = imageUrl.match(/flatmate-finder-uploads\/([^.]+)/);
+                if (match && match[1]) {
+                    const publicId = `flatmate-finder-uploads/${match[1]}`;
+                    return new Promise((resolve, reject) => {
+                        cloudinary.uploader.destroy(publicId, (error, result) => {
+                            if (error) {
+                                console.error('Cloudinary delete error:', error);
+                                reject(error);
+                            } else {
+                                console.log('Cloudinary delete result:', result);
+                                resolve(result);
+                            }
+                        });
+                    });
+                }
+                return Promise.resolve(); // No image to delete
+            });
+
+            await Promise.all(deletePromises);
+            console.log('Cloudinary images deleted.');
+        }
+
+        // Delete the post from MongoDB
+        await Requirement.deleteOne({ _id: postId, userId: userId });
+
+        console.log(`✅ Post ${postId} deleted by user ${userId}`);
+        res.json({ success: true, message: 'Post deleted successfully.' });
+
+    } catch (error) {
+        console.error('Delete post error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error while deleting post.'
+        });
+    }
+});
+
+
+// ============================================================================
 // ROUTES - SAVED POSTS (NEW)
 // ============================================================================
 
