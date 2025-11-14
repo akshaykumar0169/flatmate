@@ -97,6 +97,21 @@
             transition: transform 0.2s ease;
             cursor: pointer;
         }
+        
+        /* Fix for placeholder image */
+        .post-image-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            background: #eee; 
+            display:flex; 
+            align-items:center; 
+            justify-content:center; 
+            color: #aaa; 
+            font-size: 0.8rem; 
+            text-align: center;
+        }
 
         .post-image:hover {
             transform: scale(1.05);
@@ -237,7 +252,7 @@
             opacity: 0.9;
         }
 
-        /* *** ADDED: Styles for Delete Button *** */
+        /* STYLES FOR DELETE BUTTON */
         .post-actions {
             margin-top: 20px;
             padding-top: 15px;
@@ -270,6 +285,7 @@
             background-color: #aaa;
             cursor: not-allowed;
         }
+
 
         @media (max-width: 768px) {
             .container {
@@ -381,7 +397,7 @@
 
         function renderStats() {
             const statsSummary = document.getElementById("stats-summary");
-            if (userPosts.length === 0) {
+            if (!userPosts || userPosts.length === 0) {
                 statsSummary.style.display = "none";
                 return;
             }
@@ -394,7 +410,7 @@
                 return postDate > thirtyDaysAgo;
             }).length;
 
-            // *** FIXED: Check for division by zero ***
+            // Fix for division by zero if totalPosts is 0
             const avgPrice = totalPosts > 0 
                 ? userPosts.reduce((sum, post) => sum + (post.price || 0), 0) / totalPosts
                 : 0;
@@ -449,16 +465,16 @@
                     imagesHtml = `
                         <div class="post-images">
                             ${post.images.map(url =>
-                                // *** NOTE: The alt text here matches your screenshot ***
+                                // This src="${url}" will now correctly point to Cloudinary
                                 `<img src="${url}" class="post-image" alt="Flatmate Post Image" onclick="openImageModal('${url}')">`
                             ).join('')}
                         </div>
                     `;
                 } else {
-                    // *** ADDED: Show placeholder if no images ***
+                    // Show placeholder if no images
                     imagesHtml = `
                         <div class="post-images">
-                            <div class="post-image" style="background: #eee; display:flex; align-items:center; justify-content:center; color: #aaa; font-size: 0.8rem; text-align: center;">No Images</div>
+                            <div class="post-image-placeholder">No Images</div>
                         </div>
                     `;
                 }
@@ -467,6 +483,7 @@
                     ? post.prefs.map(pref => `<span class="preference-tag">${pref}</span>`).join('')
                     : '<span class="preference-tag">No preferences specified</span>';
 
+                // THIS IS THE HTML THAT ADDS THE BUTTON
                 div.innerHTML = `
                     <div class="post-header">
                         <h3>Flatmate Requirement #${index + 1}</h3>
@@ -521,7 +538,7 @@
             });
         }
 
-        // *** ADDED: Delete Post Function ***
+        // NEW: DELETE POST FUNCTION
         async function deletePost(postId, btn) {
             if (!confirm('Are you sure you want to permanently delete this post? This action cannot be undone.')) {
                 return;
