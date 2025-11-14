@@ -196,13 +196,23 @@ function requireAuth(req, res, next) {
 // EMAIL CONFIGURATION (NODEMAILER)
 // ============================================================================
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
+const sgTransport = require('nodemailer-sendgrid-transport');
+
+// Remove or comment out the old transporter
+// const transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth: {
+//         user: process.env.EMAIL_USER,
+//         pass: process.env.EMAIL_PASS
+//     }
+// });
+
+// Create new transporter for SendGrid
+const transporter = nodemailer.createTransport(sgTransport({
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS // IMPORTANT: Use a 16-digit Google App Password here
+        api_key: process.env.SENDGRID_API_KEY // Use the API key from Render's .env
     }
-});
+}));
 
 // Verify transporter configuration
 if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
