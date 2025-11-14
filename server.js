@@ -584,11 +584,14 @@ app.post('/api/post-requirement', requireAuth, upload.array('images', 3), async 
         });
 
         await post.save();
-        console.log('✅ New post created by:', req.session.userEmail);
+    console.log('✅ New post created by:', req.session.userEmail);
 
-        // res.status(201).json({ ... }); // <-- OLD WAY (Bad for HTML forms)
-        res.redirect('/my-posts.html'); // <-- NEW: Redirect user after success
-
+    // *** REPLACE THE REDIRECT WITH THIS JSON RESPONSE ***
+    res.status(201).json({ 
+        success: true, 
+        message: 'Post created successfully' 
+    });
+        
     } catch (err) {
         console.error('Post creation error:', err);
         res.status(500).json({
