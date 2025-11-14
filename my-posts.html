@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Posts | Flatmate Finder</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -236,6 +237,40 @@
             opacity: 0.9;
         }
 
+        /* *** ADDED: Styles for Delete Button *** */
+        .post-actions {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-delete i {
+            margin-right: 5px;
+        }
+
+        .btn-delete:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
         @media (max-width: 768px) {
             .container {
                 margin: 20px;
@@ -295,12 +330,10 @@
         </div>
 
         <div id="stats-summary" class="stats-summary" style="display: none;">
-            <!-- Stats will be inserted here -->
-        </div>
+            </div>
 
         <div id="myPostsContainer" class="posts-grid">
-            <!-- Posts will be inserted here -->
-        </div>
+            </div>
 
         <div class="action-buttons">
             <a href="post-requirement.html" class="btn">+ Create New Post</a>
@@ -347,7 +380,11 @@
         }
 
         function renderStats() {
-            if (userPosts.length === 0) return;
+            const statsSummary = document.getElementById("stats-summary");
+            if (userPosts.length === 0) {
+                statsSummary.style.display = "none";
+                return;
+            }
 
             const totalPosts = userPosts.length;
             const recentPosts = userPosts.filter(post => {
@@ -357,7 +394,10 @@
                 return postDate > thirtyDaysAgo;
             }).length;
 
-            const avgPrice = userPosts.reduce((sum, post) => sum + (post.price || 0), 0) / userPosts.length;
+            // *** FIXED: Check for division by zero ***
+            const avgPrice = totalPosts > 0 
+                ? userPosts.reduce((sum, post) => sum + (post.price || 0), 0) / totalPosts
+                : 0;
 
             const statsHTML = `
                 <h3 style="margin: 0 0 15px 0; font-size: 1.4rem;">Your Posts Summary</h3>
@@ -377,8 +417,8 @@
                 </div>
             `;
 
-            document.getElementById("stats-summary").innerHTML = statsHTML;
-            document.getElementById("stats-summary").style.display = "block";
+            statsSummary.innerHTML = statsHTML;
+            statsSummary.style.display = "block";
         }
 
         function renderPosts() {
@@ -409,8 +449,16 @@
                     imagesHtml = `
                         <div class="post-images">
                             ${post.images.map(url =>
+                                // *** NOTE: The alt text here matches your screenshot ***
                                 `<img src="${url}" class="post-image" alt="Flatmate Post Image" onclick="openImageModal('${url}')">`
                             ).join('')}
+                        </div>
+                    `;
+                } else {
+                    // *** ADDED: Show placeholder if no images ***
+                    imagesHtml = `
+                        <div class="post-images">
+                            <div class="post-image" style="background: #eee; display:flex; align-items:center; justify-content:center; color: #aaa; font-size: 0.8rem; text-align: center;">No Images</div>
                         </div>
                     `;
                 }
@@ -461,10 +509,66 @@
                             <div class="notes-text">${post.notes}</div>
                         </div>
                     ` : ''}
+
+                    <div class="post-actions">
+                        <button class="btn-delete" onclick="deletePost('${post._id}', this)">
+                            <i class="fas fa-trash"></i> Delete Post
+                        </button>
+                    </div>
                 `;
 
                 myPostsContainer.appendChild(div);
             });
+        }
+
+        // *** ADDED: Delete Post Function ***
+        async function deletePost(postId, btn) {
+            if (!confirm('Are you sure you want to permanently delete this post? This action cannot be undone.')) {
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+
+            try {
+                const response = await fetch(`/api/my-posts/${postId}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Post deleted successfully');
+                    
+                    // Animate and remove the post from the page
+                    const postElement = btn.closest('.post');
+                    postElement.style.transition = 'all 0.4s ease';
+                    postElement.style.opacity = '0';
+                    postElement.style.transform = 'scale(0.95)';
+                    
+                    setTimeout(() => {
+                        postElement.remove();
+                        // Update the local userPosts array
+                        userPosts = userPosts.filter(p => p._id !== postId);
+                        // Re-render stats
+                        renderStats();
+                        // Check if no posts are left and show the "No posts" message
+                        if (userPosts.length === 0) {
+                            renderPosts(); 
+                        }
+                    }, 400);
+
+                } else {
+                    throw new Error(data.message || 'Failed to delete post');
+                }
+
+            } catch (error) {
+                console.error('Delete error:', error);
+                alert('Error deleting post: ' + error.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-trash"></i> Delete Post';
+            }
         }
 
         function showError(message) {
