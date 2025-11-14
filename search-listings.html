@@ -433,12 +433,10 @@
             <p>Search through available listings with smart filters</p>
         </div>
 
-        <!-- Search Filters -->
         <div class="filters-container">
             <h2 class="filters-title">Search Filters</h2>
 
             <div class="filters-grid">
-                <!-- Location Filters -->
                 <div class="filter-group">
                     <label for="state">State</label>
                     <select id="state">
@@ -467,7 +465,6 @@
                     <input type="text" id="location" placeholder="Specific area or locality">
                 </div>
 
-                <!-- Budget Filters -->
                 <div class="filter-group">
                     <label for="minPrice">Min Budget (₹)</label>
                     <input type="number" id="minPrice" placeholder="5000" min="0">
@@ -478,7 +475,6 @@
                     <input type="number" id="maxPrice" placeholder="50000" min="0">
                 </div>
 
-                <!-- Other Filters -->
                 <div class="filter-group">
                     <label for="furnishing">Furnishing</label>
                     <select id="furnishing">
@@ -498,7 +494,6 @@
                     </select>
                 </div>
 
-                <!-- Preferences -->
                 <div class="filter-group preferences-container">
                     <label>Preferences</label>
                     <div class="preferences-grid">
@@ -537,7 +532,6 @@
             </div>
         </div>
 
-        <!-- Search Results -->
         <div class="results-container" id="resultsContainer" style="display: none;">
             <div class="results-header">
                 <div class="results-count" id="resultsCount">Found 0 listings</div>
@@ -557,8 +551,7 @@
             </div>
 
             <div id="listingsGrid" class="listings-grid">
-                <!-- Listings will be populated here -->
-            </div>
+                </div>
 
             <div id="noResults" class="no-results" style="display: none;">
                 <div class="no-results-icon">😔</div>
@@ -584,6 +577,7 @@
         async function loadAllListings() {
             try {
                 showLoading(true);
+                // ***FIXED: Use relative path***
                 const response = await fetch('/api/requirements', {
                     method: 'GET',
                     credentials: 'include'
@@ -789,7 +783,8 @@
         let currentUserId = null;
 
         // Get current user ID on page load
-        fetch('http://localhost:3000/api/user', { credentials: 'include' })
+        // ***FIXED: Use relative path***
+        fetch('/api/user', { credentials: 'include' })
             .then(res => res.json())
             .then(data => {
                 if (data.loggedIn) {
@@ -806,7 +801,8 @@
                 const postId = btn.getAttribute('data-post-id');
                 if (!postId) continue;
                 try {
-                    const response = await fetch(`http://localhost:3000/api/check-saved/${postId}`, {
+                    // ***FIXED: Use relative path***
+                    const response = await fetch(`/api/check-saved/${postId}`, {
                         credentials: 'include'
                     });
                     const data = await response.json();
@@ -829,7 +825,8 @@
             }
             try {
                 const isSaved = button.classList.contains('saved');
-                const url = `http://localhost:3000/api/save-post/${postId}`;
+                // ***FIXED: Use relative path***
+                const url = `/api/save-post/${postId}`;
                 const method = isSaved ? 'DELETE' : 'POST';
                 const response = await fetch(url, { method, credentials: 'include' });
                 const data = await response.json();
@@ -866,7 +863,8 @@
                 return;
             }
             try {
-                const response = await fetch('http://localhost:3000/api/conversations', {
+                // ***FIXED: Use relative path***
+                const response = await fetch('/api/conversations', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
