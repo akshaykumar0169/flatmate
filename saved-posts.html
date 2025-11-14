@@ -280,7 +280,8 @@
         // Check authentication
         async function checkAuth() {
             try {
-                const response = await fetch('http://localhost:3000/api/user', {
+                // ***FIXED: Use relative path***
+                const response = await fetch('/api/user', {
                     credentials: 'include'
                 });
                 const data = await response.json();
@@ -303,7 +304,8 @@
         // Load saved posts
         async function loadSavedPosts() {
             try {
-                const response = await fetch('http://localhost:3000/api/saved-posts', {
+                // ***FIXED: Use relative path***
+                const response = await fetch('/api/saved-posts', {
                     credentials: 'include'
                 });
                 const data = await response.json();
@@ -377,7 +379,8 @@
             if (!confirm('Remove this post from your saved list?')) return;
 
             try {
-                const response = await fetch(`http://localhost:3000/api/save-post/${postId}`, {
+                // ***FIXED: Use relative path***
+                const response = await fetch(`/api/save-post/${postId}`, {
                     method: 'DELETE',
                     credentials: 'include'
                 });
@@ -409,7 +412,8 @@
             }
 
             try {
-                const response = await fetch('http://localhost:3000/api/conversations', {
+                // ***FIXED: Use relative path***
+                const response = await fetch('/api/conversations', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
