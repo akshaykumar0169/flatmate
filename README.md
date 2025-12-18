@@ -2,7 +2,9 @@
 
 A fully functional flatmate finder website with user authentication, profile management, and post management.
 
-https://github.com/user-attachments/assets/f30d6f13-e029-48ed-b794-997ee0709778
+
+https://github.com/user-attachments/assets/c026ecf7-bce5-4abc-bd18-65475044a7f0
+
 
 ## ✨ Features
 
